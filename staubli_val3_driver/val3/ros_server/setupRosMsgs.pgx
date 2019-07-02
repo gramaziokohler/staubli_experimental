@@ -29,7 +29,7 @@
 
 
 
-  // Trajectory point message (ID 11)
+  // Joint trajectory point message (ID 11)
   // prefix length = 12 + 52
   rosTrajPtAck.prefix.nLength=64
   rosTrajPtAck.header.nMsgType=11
@@ -52,7 +52,7 @@
 
 
 
-  // Trajectory point full message (ID 14)
+  // Joint trajectory point full message (ID 14)
   // prefix length = 12 + 136
   rosTrajPtFAck.prefix.nLength=148
   rosTrajPtFAck.header.nMsgType=14
@@ -64,6 +64,17 @@
   // the message bellow will be filled upon reception
   rosTrajPtFMsg.prefix.nLength=148
 
+  // Cartesian trajectory point message (ID 31)
+  // prefix length = 12 + 48
+  rosTrajPtCartesianAck.prefix.nLength=60
+  rosTrajPtCartesianAck.header.nMsgType=31
+  rosTrajPtCartesianAck.header.nCommType=3
+  // reply: 1 = success, 2 = failure
+  rosTrajPtCartesianAck.header.nReplyCode=1
+  // position, orientation, velocities, etc are assumed to be initiliased to zero
+
+  // the message bellow will be filled upon reception
+  rosTrajPtCartesianMsg.prefix.nLength=60
 
 
   // Joint feedback message (ID 15)

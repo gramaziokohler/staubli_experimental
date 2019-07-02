@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="decTrajPtCartesian" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bFlag" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nIndex" type="num" xsi:type="array" size="1" />
+      <Local name="l_nRetVal" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  // decode message ID 31 body (data)
+
+  // assume failure to decode
+  rosTrajPtCartesianAck.header.nReplyCode=2
+
+  // sequence
+  l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData,4,"-4l",rosTrajPtCartesianMsg.cartesianTrajPt.nSeq)
+  if(l_nRetVal!=1)
+    x_bFlag=false
+    return
+  endIf
+
+  // position[3]
+  for l_nIndex=0 to 2 step 1
+    l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[(l_nIndex*4)+4],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nPosition[l_nIndex])
+    if(l_nRetVal!=1)
+      x_bFlag=false
+      return
+    endIf
+  endFor
+
+  // orientation[4]
+  for l_nIndex=0 to 3 step 1
+    l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[(l_nIndex*4)+16],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nOrientation[l_nIndex])
+    if(l_nRetVal!=1)
+      x_bFlag=false
+      return
+    endIf
+  endFor
+
+  // velocity
+  l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[32],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nVelocity)
+  if(l_nRetVal!=1)
+    x_bFlag=false
+    return
+  endIf
+
+  // acceleration
+  l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[36],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nAcceleration)
+  if(l_nRetVal!=1)
+    x_bFlag=false
+    return
+  endIf
+
+  // blending radius
+  l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[40],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nBlendingRadius)
+  if(l_nRetVal!=1)
+    x_bFlag=false
+    return
+  endIf
+
+  // duration
+  l_nRetVal=fromBinary(rosTrajPtCartesianMsg.body.nData[44],4,"4.0l",rosTrajPtCartesianMsg.cartesianTrajPt.nDuration)
+  if(l_nRetVal!=1)
+    x_bFlag=false
+    return
+  endIf
+
+  // decoding successful
+  rosTrajPtCartesianAck.header.nReplyCode=1
+  rosTrajPtCartesianAck.cartesianTrajPt.nSeq=rosTrajPtCartesianMsg.cartesianTrajPt.nSeq
+  x_bFlag=true
+end]]></Code>
+  </Program>
+</Programs>

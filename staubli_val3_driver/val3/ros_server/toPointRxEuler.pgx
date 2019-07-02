@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="toPointRxEuler" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nQuaternion" type="num" xsi:type="array" use="reference" />
+      <Parameter name="x_pPointRx" type="pointRx" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nT0" type="num" xsi:type="array" size="1" />
+      <Local name="l_nT1" type="num" xsi:type="array" size="1" />
+      <Local name="l_nT2" type="num" xsi:type="array" size="1" />
+      <Local name="l_nT3" type="num" xsi:type="array" size="1" />
+      <Local name="l_nT4" type="num" xsi:type="array" size="1" />
+      <Local name="l_nAtan2Res" type="num" xsi:type="array" size="1" />
+      <Local name="_EPS" type="num" xsi:type="array" size="1" />
+      <Local name="si" type="num" xsi:type="array" size="1" />
+      <Local name="sj" type="num" xsi:type="array" size="1" />
+      <Local name="sk" type="num" xsi:type="array" size="1" />
+      <Local name="ci" type="num" xsi:type="array" size="1" />
+      <Local name="cj" type="num" xsi:type="array" size="1" />
+      <Local name="ck" type="num" xsi:type="array" size="1" />
+      <Local name="M02" type="num" xsi:type="array" size="1" />
+      <Local name="M12" type="num" xsi:type="array" size="1" />
+      <Local name="M22" type="num" xsi:type="array" size="1" />
+      <Local name="cy" type="num" xsi:type="array" size="1" />
+      <Local name="ax" type="num" xsi:type="array" size="1" />
+      <Local name="ay" type="num" xsi:type="array" size="1" />
+      <Local name="az" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  _EPS = 1e-16
+
+  l_nT0 = 2 * (x_nQuaternion[3] * x_nQuaternion[0] + x_nQuaternion[1] * x_nQuaternion[2])
+  l_nT1 = 1 - 2 * (x_nQuaternion[0] * x_nQuaternion[0] + x_nQuaternion[1] * x_nQuaternion[1])
+  call atan2(l_nT0, l_nT1, l_nAtan2Res)
+  si = sin(l_nAtan2Res)
+  ci = cos(l_nAtan2Res)
+
+  l_nT2 = 2 * (x_nQuaternion[3] * x_nQuaternion[1] - x_nQuaternion[2] * x_nQuaternion[0])
+  sj = limit(l_nT2, -1, 1)
+  cj = cos(asin(sj))
+
+  l_nT3 = 2 * (x_nQuaternion[3] * x_nQuaternion[2] + x_nQuaternion[0] * x_nQuaternion[1])
+  l_nT4 = 1 - 2 * (x_nQuaternion[1] * x_nQuaternion[1] + x_nQuaternion[2] * x_nQuaternion[2])
+  call atan2(l_nT3, l_nT4, l_nAtan2Res)
+  sk = sin(l_nAtan2Res)
+  ck = cos(l_nAtan2Res)
+
+  // extrinsic2intrinsic
+  M02 = sj * ci * ck + si * sk
+  M12 = sj * ci * sk - si * ck
+  M22 = cj * ci
+
+  cy = sqrt(M22 * M22 + M12 * M12)
+
+  if cy > _EPS
+    call atan2(M12, M22, ax)
+    call atan2(-M02, cy, ay)
+    call atan2(sj * (si * ck) - (ci * sk), cj * ck, az)
+  else
+    ax = 0.0
+    call atan2(-M02, cy, ay)
+    call atan2(-cj * sk, sj * si * sk + ci * ck, az)
+  endIf
+
+  x_pPointRx.trsf.rx = ax * -1
+  x_pPointRx.trsf.ry = ay * -1
+  x_pPointRx.trsf.rz = az * -1
+
+end]]></Code>
+  </Program>
+</Programs>

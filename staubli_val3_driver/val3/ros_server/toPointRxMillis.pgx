@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="toPointRxMillis" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_nPositionArray" type="num" xsi:type="array" use="reference" />
+      <Parameter name="x_pPointRx" type="pointRx" xsi:type="element" use="reference" />
+    </Parameters>
+    <Locals>
+      <Local name="l_nScaleFactor" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  l_nScaleFactor = 1000.0
+  x_pPointRx.trsf.x = x_nPositionArray[0] * l_nScaleFactor
+  x_pPointRx.trsf.y = x_nPositionArray[1] * l_nScaleFactor
+  x_pPointRx.trsf.z = x_nPositionArray[2] * l_nScaleFactor
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="recvTrajPtCartesian" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="x_bFlag" type="bool" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  // attempt to receive message ID 31 data (prefix and header are in rosGenericMsg)
+  rosTrajPtCartesianMsg.prefix.nLength=rosGenericMsg.prefix.nLength
+  rosTrajPtCartesianMsg.header.nMsgType=rosGenericMsg.header.nMsgType
+  rosTrajPtCartesianMsg.header.nCommType=rosGenericMsg.header.nCommType
+  rosTrajPtCartesianMsg.header.nReplyCode=rosGenericMsg.header.nReplyCode
+
+  call recvData(siTcpIpMotion,rosTrajPtCartesianMsg.body.nData,nInConnFlag,x_bFlag)
+end]]></Code>
+  </Program>
+</Programs>

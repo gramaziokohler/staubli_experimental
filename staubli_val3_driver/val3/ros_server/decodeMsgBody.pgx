@@ -28,10 +28,13 @@
 
   switch rosGenericMsg.header.nMsgType
     case 11
-      call decTrajPt(l_bFlag)
+      call decTrajPtJoint(l_bFlag)
     break
     case 14
-      call decTrajPtFull(l_bFlag)
+      call decTrajPtJointFull(l_bFlag)
+    break
+    case 31
+      call decTrajPtCartesian(l_bFlag)
     break
     default
     break
@@ -49,6 +52,9 @@
         break
         case 14
           rosTrajPtFAck.header.nReplyCode=2
+        break
+        case 31
+          rosTrajPtCartesianAck.header.nReplyCode=2
         break
         default
         break

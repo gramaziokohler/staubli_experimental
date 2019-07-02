@@ -28,6 +28,9 @@
     case 14
       call sendRosMsg(siTcpIpMotion, rosTrajPtFAck.prefix, rosTrajPtFAck.header, rosTrajPtFAck.body, nInConnFlag)
     break
+    case 31
+      call sendRosMsg(siTcpIpMotion, rosTrajPtCartesianAck.prefix, rosTrajPtCartesianAck.header, rosTrajPtCartesianAck.body, nInConnFlag)
+    break
     default
     break
   endSwitch

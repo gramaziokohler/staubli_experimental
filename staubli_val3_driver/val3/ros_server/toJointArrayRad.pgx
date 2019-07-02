@@ -5,9 +5,6 @@
       <Parameter name="x_jJointRx" type="jointRx" xsi:type="element" use="reference" />
       <Parameter name="x_nJointArray" type="num" xsi:type="array" use="reference" />
     </Parameters>
-    <Locals>
-      <Local name="l_nDeg2Rad" type="num" xsi:type="array" size="1" />
-    </Locals>
     <Code><![CDATA[begin
   // Copyright (c) 2016, Ocado Technology - Robotics Research Team
   //
@@ -23,17 +20,13 @@
   // See the License for the specific language governing permissions and
   // limitations under the License.
 
-
-
-  l_nDeg2Rad = 0.01745329251
-  
   // assuming the remaining elements (6-9) have zeros assigned by default
-  x_nJointArray[0] = x_jJointRx.j1 * l_nDeg2Rad
-  x_nJointArray[1] = x_jJointRx.j2 * l_nDeg2Rad
-  x_nJointArray[2] = x_jJointRx.j3 * l_nDeg2Rad
-  x_nJointArray[3] = x_jJointRx.j4 * l_nDeg2Rad
-  x_nJointArray[4] = x_jJointRx.j5 * l_nDeg2Rad
-  x_nJointArray[5] = x_jJointRx.j6 * l_nDeg2Rad
+  x_nJointArray[0] = x_jJointRx.j1 * nDeg2Rad
+  x_nJointArray[1] = x_jJointRx.j2 * nDeg2Rad
+  x_nJointArray[2] = x_jJointRx.j3 * nDeg2Rad
+  x_nJointArray[3] = x_jJointRx.j4 * nDeg2Rad
+  x_nJointArray[4] = x_jJointRx.j5 * nDeg2Rad
+  x_nJointArray[5] = x_jJointRx.j6 * nDeg2Rad
 end]]></Code>
   </Program>
 </Programs>

@@ -6,6 +6,7 @@
     </Parameters>
     <Locals>
       <Local name="l_bOk" type="bool" xsi:type="array" size="1" />
+      <Local name="l_bWillMove" type="bool" xsi:type="array" size="1" />
       <Local name="l_nCounter" type="num" xsi:type="array" size="1" />
       <Local name="l_nJointError" type="num" xsi:type="array" size="1" />
       <Local name="l_mTrajPt" type="MotionCmd" xsi:type="array" size="1" />
@@ -25,10 +26,13 @@
   // See the License for the specific language governing permissions and
   // limitations under the License.
 
-
+  // MoveType = 10: movej(jointRx)
+  // MoveType = 20: movej(pointRx)
+  // MoveType = 21: movel(pointRx)
 
   switch rosGenericMsg.header.nMsgType
     case 11
+      l_mTrajPt.nMoveType = 10
       l_mTrajPt.nSequence=rosTrajPtMsg.jointTrajPt.nSeq
 
       // ROS joint position values are in rad, but VAL3 uses degrees
@@ -44,6 +48,7 @@
 
     break
     case 14
+      l_mTrajPt.nMoveType = 10
       l_mTrajPt.nSequence=rosTrajPtFMsg.jointTrajPtFull.nSeq
       l_mTrajPt.nDuration=rosTrajPtFMsg.jointTrajPtFull.nTime
 
@@ -59,6 +64,26 @@
       // not sure about accelerations as yet
       l_mTrajPt.mDesc.accel=rosTrajPtFMsg.jointTrajPtFull.nAccelerations[0]
       l_mTrajPt.mDesc.decel=l_mTrajPt.mDesc.accel
+    break
+    case 31
+      l_mTrajPt.nMoveType = 21
+      l_mTrajPt.nSequence=rosTrajPtCartesianMsg.cartesianTrajPt.nSeq
+
+      // ROS position is in meters but VAL3 uses millimeters
+      call toPointRxMillis(rosTrajPtCartesianMsg.cartesianTrajPt.nPosition, l_mTrajPt.pPointRx)
+
+      // ROS orientation is in quaternion (rad) but VAL3 uses euler angles
+      call toPointRxEuler(rosTrajPtCartesianMsg.cartesianTrajPt.nOrientation, l_mTrajPt.pPointRx)
+
+      // Read accel/decel values
+      l_mTrajPt.mDesc.accel = limit(rosTrajPtCartesianMsg.cartesianTrajPt.nAcceleration, 0, 100)
+      l_mTrajPt.mDesc.decel = l_mTrajPt.mDesc.accel
+
+      // velocity is a scalar value representing % of max velocity,
+      // such that 0.2 = 20% of maximum joint speed
+      l_mTrajPt.mDesc.vel= limit((rosTrajPtCartesianMsg.cartesianTrajPt.nVelocity * 100), 0, 100)
+      l_mTrajPt.nDuration=rosTrajPtMsg.jointTrajPt.nDuration
+
     break
     default
     break
@@ -78,14 +103,38 @@
       l_mTrajPt.mDesc.decel = 9999
     endIf
     // only push motion into buffer if not a STOP message
-    // and if joint positions are within software joint limits
-    // and if velocity is greater than zero (beucase movej() will not accept vel <= 0)
-    if (isInRange(l_mTrajPt.jJointRx) and l_mTrajPt.mDesc.vel > 0)
+    // if it's a joint type of move
+    //   and if joint positions are within software joint limits
+    //   and if velocity is greater than zero (because movej() will not accept vel <= 0)
+    // or if it's a point type of move
+    //   and if velocity is greater than zero
+    l_bWillMove = false
+    if (l_mTrajPt.nMoveType >= 10 and l_mTrajPt.nMoveType < 20) and (isInRange(l_mTrajPt.jJointRx) and l_mTrajPt.mDesc.vel > 0)
+      l_bWillMove = true
+    elseIf (l_mTrajPt.nMoveType >= 20 and l_mTrajPt.nMoveType < 30) and l_mTrajPt.mDesc.vel > 0
+      l_bWillMove = true
+    endIf
+
+    if (l_bWillMove == true)
+
+      // Check if we need to power up before the first point of a sequence
+      // This is only possible in remote mode.
+      if (l_mTrajPt.nSequence == 0)
+        // before move, check if we need to enable power
+        // (only works if robot is in remote mode)
+        if (workingMode() >= 4 and !isPowered())
+            do
+            enablePower()
+            delay(1)
+            until isPowered()
+        endIf
+      endIf
+
       call libQueueFuncs:push(qTrajPtBuffer,l_mTrajPt,l_bOk)
     else
       l_bOk = false
     endIf
-    
+
     if (l_bOk==false)
       // could not push trajectory point into buffer
       // thus ACK should flag FAILURE, but only if comm type is request
@@ -96,6 +145,9 @@
           break
           case 14
             rosTrajPtFAck.header.nReplyCode=2
+          break
+          case 31
+            rosTrajPtCartesianAck.header.nReplyCode=2
           break
           default
           break

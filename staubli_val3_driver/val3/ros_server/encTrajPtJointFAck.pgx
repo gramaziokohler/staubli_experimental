@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
-  <Program name="recvTrajPtFull" access="public">
-    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
-      <Parameter name="x_bFlag" type="bool" xsi:type="element" use="reference" />
-    </Parameters>
+  <Program name="encTrajPtJointFAck" access="public">
     <Code><![CDATA[begin
   // Copyright (c) 2016, Ocado Technology - Robotics Research Team
   //
@@ -21,13 +18,14 @@
 
 
 
-  // receive message ID 14 data (prefix and header are in rosGenericMsg)
-  rosTrajPtFMsg.prefix.nLength=rosGenericMsg.prefix.nLength
-  rosTrajPtFMsg.header.nMsgType=rosGenericMsg.header.nMsgType
-  rosTrajPtFMsg.header.nCommType=rosGenericMsg.header.nCommType
-  rosTrajPtFMsg.header.nReplyCode=rosGenericMsg.header.nReplyCode
+  // encode 'prefix' and 'header'
+  call encPrefixHeader(rosTrajPtFAck.prefix, rosTrajPtFAck.header)
 
-  call recvData(siTcpIpMotion,rosTrajPtFMsg.body.nData,nInConnFlag,x_bFlag)
+  // encode body message (data)
+  toBinary(rosTrajPtFAck.jointTrajPtFull.nRobotId,1,"-4l",rosTrajPtFAck.body.nData)
+  toBinary(rosTrajPtFAck.jointTrajPtFull.nSeq,1,"-4l",rosTrajPtFAck.body.nData[4])
+
+  // encodings of 'positions[10]', velocities[10]' and accelerations[10]' ignored to save CPU time, since values are all zeros
 end]]></Code>
   </Program>
 </Programs>
