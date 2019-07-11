@@ -104,6 +104,8 @@
   // create asynchronous task to receive heartbeat on port 11002
   taskCreate sHtbtTaskName, 10, recvHeartbeat()
 
+  logMsg("ROS-I Server started")
+
 end]]></Code>
   </Program>
 </Programs>

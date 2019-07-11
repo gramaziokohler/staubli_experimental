@@ -20,7 +20,7 @@
 
   resetMotion()
   popUpMsg("Pending movement commands have been cancelled.")
-  cls()
+
 end]]></Code>
   </Program>
 </Programs>
